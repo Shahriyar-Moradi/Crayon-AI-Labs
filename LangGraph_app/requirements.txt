@@ -1,0 +1,26 @@
+# Core FastAPI and web server
+fastapi
+uvicorn
+pydantic
+python-multipart
+
+# Environment management
+python-dotenv
+
+# LangChain ecosystem
+langchain
+langchain-core
+langchain-openai
+
+# LangGraph for workflow management
+langgraph
+
+# OpenAI integration
+openai
+
+# Vector database (Pinecone)
+pinecone
+
+
+sqlalchemy
+# aiosqlite==0.19.0 
