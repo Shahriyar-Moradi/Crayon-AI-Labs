@@ -1,0 +1,22 @@
+# Streamlit web framework
+streamlit>=1.28.0
+
+
+# AI and Language Models
+openai
+openai-agents
+
+# Vector Database
+pinecone
+
+# Database ORM
+sqlalchemy
+
+# Configuration Management
+python-dotenv
+
+# Data Validation
+pydantic
+
+# Additional dependencies for production
+requests 
