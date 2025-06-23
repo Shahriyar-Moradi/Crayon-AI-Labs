@@ -1,0 +1,23 @@
+# Core API Framework
+fastapi
+uvicorn
+torch
+
+# AI and Language Models
+openai
+openai-agents
+
+# Vector Database
+pinecone
+
+# Database ORM
+sqlalchemy
+
+# Configuration Management
+python-dotenv
+
+# Data Validation
+pydantic
+
+# Additional dependencies for production
+requests 
