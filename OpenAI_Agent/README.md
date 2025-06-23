@@ -11,12 +11,11 @@ A production-ready chatbot with memory capabilities using OpenAI GPT-4 and Pinec
 
 ```bash
 # Copy environment template
-cp config/env_template.txt .env
+cp .env
 
 # Edit .env with your API keys
 OPENAI_API_KEY=your_openai_api_key_here
 PINECONE_API_KEY=your_pinecone_api_key_here
-MEMORY_INDEX_NAME=chatbot-memory
 ```
 
 ### 2. Install Dependencies
