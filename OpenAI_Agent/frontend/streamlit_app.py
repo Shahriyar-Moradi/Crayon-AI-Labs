@@ -7,7 +7,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Agent_chat_memory.my_agent import process_query_with_memory, memory_service
+from my_agent import process_query_with_memory, memory_service
 import logging
 
 # Configure logging
