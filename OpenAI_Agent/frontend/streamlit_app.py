@@ -72,7 +72,7 @@ st.markdown("""
 def initialize_session_state():
     """Initialize session state variables"""
     if 'user_id' not in st.session_state:
-        st.session_state.user_id = str(uuid.uuid4())
+        st.session_state.user_id = ""
     
     if 'conversation_history' not in st.session_state:
         st.session_state.conversation_history = []
@@ -82,19 +82,50 @@ def initialize_session_state():
     
     if 'processing' not in st.session_state:
         st.session_state.processing = False
+    
+    if 'user_id_input' not in st.session_state:
+        st.session_state.user_id_input = ""
+
+def load_user_conversation(user_id: str):
+    """Load conversation history for a specific user ID"""
+    try:
+        # Get past memories for this user
+        memories = memory_service.get_all_user_memories(user_id, limit=100)
+        
+        # Clear current conversation
+        st.session_state.conversation_history = []
+        st.session_state.messages = []
+        
+        # Sort memories by timestamp if available
+        if memories:
+            memories.sort(key=lambda x: x.get('timestamp', '0'))
+            
+            # Reconstruct conversation from memories
+            for memory in memories:
+                message_type = memory.get('message_type', 'user')
+                message_content = memory.get('message', '')
+                
+                if message_content:
+                    st.session_state.messages.append({
+                        "role": message_type if message_type in ['user', 'assistant'] else 'user',
+                        "content": message_content
+                    })
+                    
+                    # Also add to conversation history for context
+                    st.session_state.conversation_history.append((message_type, message_content))
+        
+        st.session_state.user_id = user_id
+        st.success(f"Loaded conversation for User ID: {user_id}")
+        
+    except Exception as e:
+        logger.error(f"Error loading user conversation: {str(e)}")
+        st.error(f"Error loading conversation: {str(e)}")
 
 def clear_conversation():
     """Clear the current conversation"""
     st.session_state.conversation_history = []
     st.session_state.messages = []
     st.success("Conversation cleared!")
-
-def new_session():
-    """Start a new session with a new user ID"""
-    st.session_state.user_id = str(uuid.uuid4())
-    st.session_state.conversation_history = []
-    st.session_state.messages = []
-    st.success(f"New session started! Session ID: {st.session_state.user_id[:8]}...")
 
 async def get_bot_response(user_input: str, user_id: str, conversation_history: List[Tuple[str, str]]) -> str:
     """Get response from the memory-enabled chatbot"""
@@ -154,22 +185,35 @@ def main():
     # Sidebar
     with st.sidebar:
         st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
-        st.header("🔧 Session Management")
+        st.header("👤 User Management")
         
-        # Session info
-        st.info(f"**Session ID:** {st.session_state.user_id[:8]}...")
+        # User ID input
+        user_id_input = st.text_input(
+            "Enter your User ID:",
+            value=st.session_state.user_id_input,
+            placeholder="e.g., john_doe_123",
+            help="Enter your unique user ID to load your conversation history"
+        )
         
-        # Session controls
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🆕 New Session", use_container_width=True):
-                new_session()
+        # Load user conversation button
+        if st.button("🔄 Load Conversation", use_container_width=True):
+            if user_id_input.strip():
+                st.session_state.user_id_input = user_id_input.strip()
+                load_user_conversation(user_id_input.strip())
                 st.rerun()
+            else:
+                st.error("Please enter a valid User ID")
         
-        with col2:
+        # Current user info
+        if st.session_state.user_id:
+            st.info(f"**Current User:** {st.session_state.user_id}")
+            
+            # Clear conversation button
             if st.button("🗑️ Clear Chat", use_container_width=True):
                 clear_conversation()
                 st.rerun()
+        else:
+            st.warning("Please enter your User ID to start chatting")
         
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -193,9 +237,12 @@ def main():
                 )
     
     # Chat input
-    user_input = st.chat_input("Type your message here...", disabled=st.session_state.processing)
+    chat_disabled = st.session_state.processing or not st.session_state.user_id
+    chat_placeholder = "Enter your User ID first..." if not st.session_state.user_id else "Type your message here..."
     
-    if user_input and not st.session_state.processing:
+    user_input = st.chat_input(chat_placeholder, disabled=chat_disabled)
+    
+    if user_input and not st.session_state.processing and st.session_state.user_id:
         # Add user message to session
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.session_state.processing = True
@@ -245,29 +292,22 @@ def main():
     with st.expander("ℹ️ How to use this chatbot"):
         st.markdown("""
         ### Features:
-        - **Memory-Enabled Conversations**: The bot remembers your past interactions
-        - **Session Management**: Start new sessions or clear current conversation
-        - **Memory Search**: Search through your conversation history
-        - **Persistent Context**: Your conversations are stored and can be referenced later
+        - **Memory-Enabled Conversations**: The bot remembers your past interactions across sessions
+        - **User ID Based**: Your conversations persist based on your unique User ID
+        - **Conversation History**: Automatically loads your past conversations when you enter your User ID
+        - **Persistent Context**: Your conversations are stored permanently and can be accessed anytime
+        
+        ### How to Start:
+        1. **Enter your User ID** in the sidebar (e.g., "john_doe_123", "alice2024", etc.)
+        2. **Click "Load Conversation"** to retrieve your chat history
+        3. **Start chatting** - the bot remembers everything from previous sessions
         
         ### Tips:
+        - Use a consistent User ID to maintain your conversation history
         - Ask about past conversations: "What did we discuss about..."
         - Reference previous topics: "Remember when we talked about..."
         - The bot will automatically use relevant memories to provide better responses
-        - Use the sidebar to manage your session and explore your conversation history
         """)
-    
-    # Troubleshooting section
-    
-        
-        # Add real-time debug info
-        if st.button("🔍 Show Debug Info"):
-            st.json({
-                "user_id": st.session_state.user_id,
-                "messages_in_session": len(st.session_state.messages),
-                "conversation_history_length": len(st.session_state.conversation_history),
-                "processing_status": st.session_state.processing
-            })
     
     # Footer
     st.markdown("---")
