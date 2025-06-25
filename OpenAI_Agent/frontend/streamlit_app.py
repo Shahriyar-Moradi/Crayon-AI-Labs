@@ -122,10 +122,11 @@ def load_user_conversation(user_id: str):
         st.error(f"Error loading conversation: {str(e)}")
 
 def clear_conversation():
-    """Clear the current conversation"""
+    """Clear the current session messages but keep user ID"""
     st.session_state.conversation_history = []
     st.session_state.messages = []
-    st.success("Conversation cleared!")
+    # Keep the user_id and user_id_input so user can reload conversation
+    st.success("Current session cleared! Your conversation history is still saved - reload to see it again.")
 
 async def get_bot_response(user_input: str, user_id: str, conversation_history: List[Tuple[str, str]]) -> str:
     """Get response from the memory-enabled chatbot"""
@@ -208,10 +209,17 @@ def main():
         if st.session_state.user_id:
             st.info(f"**Current User:** {st.session_state.user_id}")
             
-            # Clear conversation button
-            if st.button("🗑️ Clear Chat", use_container_width=True):
-                clear_conversation()
-                st.rerun()
+            # Action buttons
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔄 Reload", use_container_width=True, help="Reload conversation history from memory"):
+                    load_user_conversation(st.session_state.user_id)
+                    st.rerun()
+            
+            with col2:
+                if st.button("🗑️ Clear", use_container_width=True, help="Clear current session (history preserved)"):
+                    clear_conversation()
+                    st.rerun()
         else:
             st.warning("Please enter your User ID to start chatting")
         
@@ -304,6 +312,8 @@ def main():
         
         ### Tips:
         - Use a consistent User ID to maintain your conversation history
+        - **Clear vs Reload**: "Clear" only clears the current session - your history is preserved in memory
+        - **Reload** anytime to restore your full conversation history
         - Ask about past conversations: "What did we discuss about..."
         - Reference previous topics: "Remember when we talked about..."
         - The bot will automatically use relevant memories to provide better responses
