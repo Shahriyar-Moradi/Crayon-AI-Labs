@@ -258,30 +258,7 @@ def main():
         """)
     
     # Troubleshooting section
-    with st.expander("🔧 Troubleshooting Memory Issues"):
-        st.markdown("""
-        ### If memories aren't working:
-        
-        1. **Test the Memory System**: Use the "🧪 Test Memory System" button in the sidebar
-        
-        2. **Check Memory Statistics**: Look at the statistics in the sidebar - you should see stored memories
-        
-        3. **View All Memories**: Click "📋 All Memories" to see what's actually stored
-        
-        4. **Check API Keys**: Ensure your `.env` file has valid OpenAI and Pinecone API keys
-        
-        5. **Debug Outside Streamlit**: Run `python run_streamlit.py debug` in your terminal
-        
-        ### Common Issues:
-        - **No memories showing**: Check if API keys are correct and Pinecone index exists
-        - **Low similarity scores**: Try broader search terms or lower similarity thresholds
-        - **Slow responses**: Memory retrieval can take a few seconds for large datasets
-        
-        ### Memory Search Tips:
-        - Use specific keywords from your conversations
-        - Try different search terms if nothing appears
-        - The system uses semantic similarity, so related concepts should match
-        """)
+    
         
         # Add real-time debug info
         if st.button("🔍 Show Debug Info"):
