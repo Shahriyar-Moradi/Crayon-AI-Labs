@@ -212,7 +212,7 @@ def main():
             # Action buttons
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("🔄 Reload", use_container_width=True, help="Reload conversation history from memory"):
+                if st.button("🔄 Reload Conversation", use_container_width=True, help="Reload conversation history from memory"):
                     load_user_conversation(st.session_state.user_id)
                     st.rerun()
             
